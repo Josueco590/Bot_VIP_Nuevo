@@ -1,6 +1,7 @@
 import os
 import threading
 import json
+import asyncio
 from datetime import datetime, timedelta
 from flask import Flask
 from telegram import Update
@@ -32,21 +33,24 @@ def guardar(data):
         json.dump(data, f)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Bot VIP activo ✅ 24/7")
+    await update.message.reply_text("Bot VIP activo ✅ 24/7 - Michelle Heras")
 
 async def agregar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         uid = str(context.args[0]); dias = int(context.args[1]) if len(context.args) > 1 else 30
         data = cargar(); data[uid] = (datetime.now() + timedelta(days=dias)).isoformat()
         guardar(data)
-        await update.message.reply_text(f"✅ Agregado {uid} por {dias} días")
+        await update.message.reply_text(f"✅ Agregado {uid} por {dias} días\nVence: {data[uid][:10]}")
     except:
         await update.message.reply_text("Uso: /agregar ID dias")
 
 async def ver(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = cargar()
-    if not data: await update.message.reply_text("No hay suscripciones"); return
-    await update.message.reply_text("\n".join([f"{k} -> {v[:10]}" for k,v in data.items()]))
+    if not data:
+        await update.message.reply_text("No hay suscripciones")
+        return
+    texto = "📋 Suscripciones:\n\n" + "\n".join([f"{k} -> {v[:10]}" for k,v in data.items()])
+    await update.message.reply_text(texto)
 
 async def quitar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
@@ -60,7 +64,6 @@ async def handle_business(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not msg: return
     txt = (msg.text or "") + (msg.caption or "")
     if "ya pag" not in txt.lower(): return
-    
     user_id = msg.from_user.id
     caption = (
         f"✅ <b>Comprobante recibido</b>\n\n"
@@ -83,6 +86,7 @@ def run_flask():
     app.run(host="0.0.0.0", port=port)
 
 if __name__ == "__main__":
+    asyncio.set_event_loop(asyncio.new_event_loop())
     threading.Thread(target=run_flask, daemon=True).start()
     print("Bot VIP con HISTORIAL, VENCIMIENTOS y ANTI-BUCLE iniciado - MODO 24/7")
     application = Application.builder().token(BOT_TOKEN).build()
