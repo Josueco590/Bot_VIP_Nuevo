@@ -363,13 +363,13 @@ metodos_pago_texto = """💳 MÉTODOS DE PAGO MÉXICO:
 
 • Transferencia:
 Santander
-CLABE: 014470140190434923
+CLABE: <code>014470140190434923</code>
 Beneficiario: Michelle Heras
 Concepto: Tu nombre de usuario de Telegram
 Precio: $200 pesos México
 
 • Pago en efectivo OXXO 🇲🇽
-Número de tarjeta: 4915669550533218
+Número de tarjeta: <code>4915669550533218</code>
 Precio: $200 pesos México
 
 
@@ -489,7 +489,10 @@ async def handle_business_message(update: Update, context: ContextTypes.DEFAULT_
         data[user_id]["history"] = data[user_id]["history"][-50:]
     save_data(data)
     async def reply_bot(t):
-        await context.bot.send_message(chat_id=chat_id, text=t, business_connection_id=b_conn_id)
+        try:
+            await context.bot.send_message(chat_id=chat_id, text=t, business_connection_id=b_conn_id, parse_mode="HTML")
+        except:
+            await context.bot.send_message(chat_id=chat_id, text=t, business_connection_id=b_conn_id)
         append_conversation_message(user_id, full_name, username, t, "bot")
 
     async def notify_admin(admin_text, forward_photo=False):
