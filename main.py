@@ -363,13 +363,13 @@ metodos_pago_texto = """💳 MÉTODOS DE PAGO MÉXICO:
 
 • Transferencia:
 Santander
-CLABE: <code>014470140190434923</code>
+CLABE: 014470140190434923
 Beneficiario: Michelle Heras
 Concepto: Tu nombre de usuario de Telegram
 Precio: $200 pesos México
 
 • Pago en efectivo OXXO 🇲🇽
-Número de tarjeta: <code>4915669550533218</code>
+Número de tarjeta: 4915669550533218
 Precio: $200 pesos México
 
 
@@ -490,10 +490,22 @@ async def handle_business_message(update: Update, context: ContextTypes.DEFAULT_
     save_data(data)
     async def reply_bot(t):
         try:
-            await context.bot.send_message(chat_id=chat_id, text=t, business_connection_id=b_conn_id, parse_mode="HTML")
+            await context.bot.send_message(chat_id=chat_id, text=t, business_connection_id=b_conn_id)
         except:
             await context.bot.send_message(chat_id=chat_id, text=t, business_connection_id=b_conn_id)
         append_conversation_message(user_id, full_name, username, t, "bot")
+        # Si es mensaje de métodos de pago, mandar CLABE en azul copiable aparte
+        if "MÉTODOS DE PAGO" in t:
+            try:
+                azul = (
+                    "🔹 <b>CLABE para copiar con 1 toque:</b>\n"
+                    "<code>014470140190434923</code>\n\n"
+                    "🔹 <b>Tarjeta OXXO para copiar:</b>\n"
+                    "<code>4915669550533218</code>"
+                )
+                await context.bot.send_message(chat_id=chat_id, text=azul, business_connection_id=b_conn_id, parse_mode="HTML")
+            except Exception as e:
+                print(f"Error enviando azul: {e}")
 
     async def notify_admin(admin_text, forward_photo=False):
         try:
